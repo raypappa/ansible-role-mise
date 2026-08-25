@@ -62,7 +62,9 @@ jobs:
           pip install ansible-core pywinrm
 
       - name: Install Ansible collections
+        shell: cmd
         run: |
+          chcp 65001
           ansible-galaxy collection install ansible.windows
           ansible-galaxy collection install community.windows
 
@@ -111,7 +113,10 @@ jobs:
           '@ | Out-File -FilePath test_windows.yml -Encoding utf8
 
       - name: Run test playbook
-        run: ansible-playbook test_windows.yml -vvv
+        shell: cmd
+        run: |
+          chcp 65001
+          ansible-playbook test_windows.yml -vvv
 
       - name: Clean up
         if: always()
