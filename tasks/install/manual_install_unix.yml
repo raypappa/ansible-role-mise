@@ -1,0 +1,41 @@
+---
+- name: Set download parameters
+  ansible.builtin.set_fact:
+    _mise_arch: "{{ 'aarch64' if ansible_architecture == 'aarch64' else 'x86_64' }}"
+    _mise_os: "{{ 'linux' if ansible_system == 'Linux' else 'macos' }}"
+    _mise_version_tag: "{{ 'v' + mise_version if mise_version | length > 0 else 'latest' }}"
+
+- name: Set download URL
+  ansible.builtin.set_fact:
+    _mise_download_url: >-
+      https://github.com/jdx/mise/releases/download/
+      {{ _mise_version_tag }}/
+      mise-{{ _mise_version_tag }}-{{ _mise_os }}-{{ _mise_arch }}.tar.gz
+
+- name: Download mise binary
+  ansible.builtin.get_url:
+    url: "{{ _mise_download_url }}"
+    dest: /tmp/mise.tar.gz
+    mode: "0644"
+
+- name: Create install directory
+  ansible.builtin.file:
+    path: "{{ mise_install_path | dirname }}"
+    state: directory
+    mode: "0755"
+
+- name: Extract mise binary
+  ansible.builtin.unarchive:
+    src: /tmp/mise.tar.gz
+    dest: "{{ mise_install_path | dirname }}"
+    remote_src: true
+
+- name: Make mise executable
+  ansible.builtin.file:
+    path: "{{ mise_install_path }}"
+    mode: "0755"
+
+- name: Clean up
+  ansible.builtin.file:
+    path: /tmp/mise.tar.gz
+    state: absent

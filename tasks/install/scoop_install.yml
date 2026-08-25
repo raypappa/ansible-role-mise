@@ -1,0 +1,20 @@
+---
+- name: Ensure scoop is installed
+  ansible.builtin.win_shell: |
+    $ErrorActionPreference = 'Stop'
+    try { Get-Command scoop -ErrorAction Stop | Out-Null; exit 0 } catch { exit 1 }
+  register: _scoop_check
+  changed_when: false
+  failed_when: false
+
+- name: Fail if scoop not found
+  ansible.builtin.fail:
+    msg: >
+      scoop is required for mise_install_method=scoop but was not found.
+      Install scoop first: Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force; Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
+  when: _scoop_check.rc != 0
+
+- name: Install mise via scoop
+  community.windows.win_scoop:
+    name: mise
+    state: present

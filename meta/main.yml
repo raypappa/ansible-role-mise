@@ -1,0 +1,46 @@
+---
+galaxy_info:
+  role_name: mise
+  author: stoney
+  description: Install and configure mise (mise-en-place) - a polyglot runtime manager
+  license: MIT
+  min_ansible_version: "2.14"
+
+  platforms:
+    - name: Ubuntu
+      versions:
+        - jammy
+        - noble
+    - name: Debian
+      versions:
+        - bookworm
+        - bullseye
+    - name: EL
+      versions:
+        - "8"
+        - "9"
+    - name: Fedora
+      versions:
+        - "39"
+        - "40"
+        - "41"
+    - name: Amazon
+      versions:
+        - all
+    - name: Alpine
+      versions:
+        - all
+    - name: Windows
+      versions:
+        - all
+
+  galaxy_tags:
+    - mise
+    - runtime
+    - tools
+    - development
+    - polyglot
+    - versionmanager
+    - windows
+
+dependencies: []

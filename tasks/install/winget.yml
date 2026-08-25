@@ -1,0 +1,9 @@
+---
+- name: Include winget installation tasks
+  ansible.builtin.include_tasks: winget_install.yml
+  when: ansible_system == 'Win32NT'
+
+- name: Include winget check tasks (non-Windows warning)
+  ansible.builtin.debug:
+    msg: "winget installation method is only supported on Windows"
+  when: ansible_system != 'Win32NT'

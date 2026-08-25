@@ -1,0 +1,88 @@
+---
+- name: Converge - install mise
+  hosts: all
+  become: true
+  vars:
+    mise_install_method: curl
+    mise_install_scope: global
+  roles:
+    - role: mise
+
+- name: Test mise_use - install tools to global config
+  hosts: all
+  become: true
+  tasks:
+    - name: Install node via mise_use
+      mise_use:
+        name: node@22
+        global_config: true
+        executable: /usr/local/bin/mise
+
+    - name: Install python via mise_use
+      mise_use:
+        name: python@3.12
+        global_config: true
+        executable: /usr/local/bin/mise
+
+    - name: Install multiple tools at once
+      mise_use:
+        name:
+          - jq@latest
+          - ripgrep@latest
+        global_config: true
+        executable: /usr/local/bin/mise
+
+    - name: Install ripgrep via mise_use
+      mise_use:
+        name: ripgrep@latest
+        global_config: true
+        executable: /usr/local/bin/mise
+
+    - name: Remove tool from config
+      mise_use:
+        name: jq
+        state: absent
+        global_config: true
+        executable: /usr/local/bin/mise
+
+- name: Test mise_install - install tool versions
+  hosts: all
+  become: true
+  tasks:
+    - name: Install a specific node version
+      mise_install:
+        name: node@20
+        executable: /usr/local/bin/mise
+
+    - name: Install latest rust
+      mise_install:
+        name: rust@latest
+        executable: /usr/local/bin/mise
+
+    - name: Uninstall a specific node version
+      mise_install:
+        name: node@20
+        state: absent
+        executable: /usr/local/bin/mise
+
+- name: Test mise_settings - configure mise
+  hosts: all
+  become: true
+  tasks:
+    - name: Set auto_update setting
+      mise_settings:
+        name: auto_update
+        value: true
+        executable: /usr/local/bin/mise
+
+    - name: Add a trusted config path
+      mise_settings:
+        name: trusted_config_paths
+        value: "/"
+        executable: /usr/local/bin/mise
+
+    - name: Remove a setting
+      mise_settings:
+        name: auto_update
+        state: absent
+        executable: /usr/local/bin/mise

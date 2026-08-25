@@ -1,0 +1,38 @@
+---
+# Windows testing scenario for local development
+# For CI testing, see .github/workflows/windows.yml
+
+dependency:
+  name: galaxy
+
+driver:
+  name: docker
+
+platforms:
+  - name: windows-desktop
+    image: "geerlingguy/docker-windows-desktop:latest"
+    pre_build_image: true
+    privileged: true
+
+provisioner:
+  name: ansible
+  config_options:
+    defaults:
+      callbacks_enabled: profile_tasks, timer
+      stdout_callback: yaml
+
+verifier:
+  name: ansible
+
+scenario:
+  name: windows
+  test_sequence:
+    - dependency
+    - cleanup
+    - destroy
+    - syntax
+    - create
+    - converge
+    - verify
+    - cleanup
+    - destroy

@@ -1,0 +1,36 @@
+---
+# Shell activation for Linux/macOS (bash, zsh, fish)
+- name: Activate mise in bash
+  ansible.builtin.lineinfile:
+    path: "{{ mise_user_home }}/.bashrc"
+    line: 'eval "$({{ mise_install_path }} activate bash)"'
+    create: true
+    mode: "0644"
+    owner: "{{ mise_user }}"
+  when: mise_shell == 'bash'
+  notify: Reload shell RC
+
+- name: Activate mise in zsh
+  ansible.builtin.lineinfile:
+    path: "{{ mise_user_home }}/.zshrc"
+    line: 'eval "$({{ mise_install_path }} activate zsh)"'
+    create: true
+    mode: "0644"
+    owner: "{{ mise_user }}"
+  when: mise_shell == 'zsh'
+  notify: Reload shell RC
+
+- name: Activate mise in fish
+  ansible.builtin.lineinfile:
+    path: "{{ mise_user_home }}/.config/fish/config.fish"
+    line: "{{ mise_install_path }} activate fish | source"
+    create: true
+    mode: "0644"
+    owner: "{{ mise_user }}"
+  when: mise_shell == 'fish'
+  notify: Reload shell RC
+
+# Shell activation for Windows (PowerShell / pwsh)
+- name: Include Windows shell activation
+  ansible.builtin.include_tasks: shell_windows.yml
+  when: ansible_system == 'Win32NT' and mise_shell in ['powershell', 'pwsh']

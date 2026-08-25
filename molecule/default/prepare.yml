@@ -1,0 +1,17 @@
+---
+- name: Prepare
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Detect OS family
+      ansible.builtin.raw: cat /etc/os-release
+      register: os_release
+      changed_when: false
+
+    - name: Install sudo and python3 (Debian/Ubuntu)
+      ansible.builtin.raw: apt-get update && apt-get install -y sudo python3
+      when: "'ID=debian' in os_release.stdout or 'ID=ubuntu' in os_release.stdout"
+
+    - name: Install sudo and python3 (Fedora)
+      ansible.builtin.raw: dnf install -y sudo python3
+      when: "'ID=fedora' in os_release.stdout"

@@ -1,0 +1,8 @@
+---
+- name: Include Windows manual installation tasks
+  ansible.builtin.include_tasks: manual_install.yml
+  when: ansible_system == 'Win32NT'
+
+- name: Include Unix manual installation tasks
+  ansible.builtin.include_tasks: manual_install_unix.yml
+  when: ansible_system != 'Win32NT'

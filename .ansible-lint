@@ -1,0 +1,12 @@
+---
+exclude_paths:
+  - .git/
+  - .github/
+  - molecule/
+
+skip_list:
+  - yaml[truthy]
+  - name[template]
+
+warn_list:
+  - role-name

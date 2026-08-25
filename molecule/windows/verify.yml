@@ -1,0 +1,11 @@
+---
+# Windows verification is included in converge.yml
+# This file is intentionally empty
+- name: Verify mise installation
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: No verification tasks
+      ansible.builtin.debug:
+        msg: "Windows verification is included in converge.yml"

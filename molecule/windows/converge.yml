@@ -1,0 +1,37 @@
+---
+- name: Converge - install mise (Windows)
+  hosts: windows-desktop
+  become: true
+  vars:
+    mise_install_method: scoop
+    mise_install_scope: global
+    mise_shell: powershell
+    mise_activate_shell: true
+  roles:
+    - role: mise
+
+- name: Verify mise is installed (Windows)
+  hosts: windows-desktop
+  become: true
+  tasks:
+    - name: Check mise binary exists
+      ansible.windows.win_stat:
+        path: "C:\\Users\\{{ ansible_user_id }}\\AppData\\Local\\mise\\mise.exe"
+      register: _mise_stat_win
+
+    - name: Assert mise binary exists
+      ansible.builtin.assert:
+        that:
+          - _mise_stat_win.stat.exists
+        fail_msg: "mise binary not found"
+
+    - name: Get mise version
+      ansible.builtin.win_shell: "& mise --version"
+      register: _mise_version_win
+      changed_when: false
+
+    - name: Assert mise version is reported
+      ansible.builtin.assert:
+        that:
+          - "'mise' in _mise_version_win.stdout or 'v' in _mise_version_win.stdout"
+        fail_msg: "mise --version failed"

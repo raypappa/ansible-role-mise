@@ -1,0 +1,17 @@
+---
+- name: Ensure npm is available
+  ansible.builtin.command: which npm
+  register: _npm_check
+  changed_when: false
+  failed_when: false
+
+- name: Fail if npm not found
+  ansible.builtin.fail:
+    msg: "npm is required for mise_install_method=npm but was not found"
+  when: _npm_check.rc != 0
+
+- name: Install mise via npm
+  ansible.builtin.command: "npm install -g mise"
+  become: true
+  changed_when: true
+  notify: Reload shell RC

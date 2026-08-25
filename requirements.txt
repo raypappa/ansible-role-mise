@@ -1,0 +1,6 @@
+molecule>=6.0
+ansible-core>=2.14
+ansible-lint>=6.0
+yamllint>=1.30
+docker>=6.0
+testinfra>=10.0

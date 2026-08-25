@@ -1,0 +1,81 @@
+---
+- name: Verify mise is installed and configured
+  hosts: all
+  become: true
+  tasks:
+    # Verify mise binary
+    - name: Check mise binary exists
+      ansible.builtin.stat:
+        path: /usr/local/bin/mise
+      register: _mise_stat
+
+    - name: Assert mise binary exists
+      ansible.builtin.assert:
+        that:
+          - _mise_stat.stat.exists
+        fail_msg: "mise binary not found at /usr/local/bin/mise"
+
+    - name: Get mise version
+      ansible.builtin.command: /usr/local/bin/mise --version
+      register: _mise_version
+      changed_when: false
+
+    - name: Assert mise version is reported
+      ansible.builtin.assert:
+        that:
+          - _mise_version.stdout is defined
+          - _mise_version.stdout | length > 0
+        fail_msg: "mise --version returned empty output"
+
+    - name: Display mise version
+      ansible.builtin.debug:
+        msg: "mise version: {{ _mise_version.stdout }}"
+
+    # Verify mise_use worked - tools should be installed
+    - name: Check installed tools via mise ls
+      ansible.builtin.command: /usr/local/bin/mise ls --json --installed --global
+      register: _mise_ls_installed
+      changed_when: false
+
+    - name: Assert node is installed
+      ansible.builtin.assert:
+        that:
+          - "'node' in _mise_ls_installed.stdout"
+        fail_msg: "node not installed via mise"
+
+    - name: Assert python is installed
+      ansible.builtin.assert:
+        that:
+          - "'python' in _mise_ls_installed.stdout"
+        fail_msg: "python not installed via mise"
+
+    - name: Assert ripgrep is installed
+      ansible.builtin.assert:
+        that:
+          - "'ripgrep' in _mise_ls_installed.stdout"
+        fail_msg: "ripgrep not installed via mise"
+
+    # Verify mise_install worked - rust is installed but not in global config
+    - name: Check all installed tools via mise ls
+      ansible.builtin.command: /usr/local/bin/mise ls --json --installed
+      register: _mise_ls_all_installed
+      changed_when: false
+
+    - name: Assert rust is installed
+      ansible.builtin.assert:
+        that:
+          - "'rust' in _mise_ls_all_installed.stdout"
+        fail_msg: "rust not installed via mise"
+
+    # Verify mise can list remote tools
+    - name: Verify mise can list remote tools
+      ansible.builtin.command: /usr/local/bin/mise ls-remote node
+      register: _mise_ls
+      changed_when: false
+      failed_when: _mise_ls.rc != 0
+
+    - name: Assert mise can query remote tools
+      ansible.builtin.assert:
+        that:
+          - _mise_ls.rc == 0
+        fail_msg: "mise ls-remote failed"

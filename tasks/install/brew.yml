@@ -1,0 +1,35 @@
+---
+- name: Check if brew is installed
+  ansible.builtin.stat:
+    path: /opt/homebrew/bin/brew
+  register: _brew_path
+  ignore_errors: true
+
+- name: Check if brew is installed (Intel)
+  ansible.builtin.stat:
+    path: /usr/local/bin/brew
+  register: _brew_path_intel
+  ignore_errors: true
+
+- name: Set brew path
+  ansible.builtin.set_fact:
+    _brew_executable: >-
+      {{ '/opt/homebrew/bin/brew' if _brew_path.stat.exists
+         else '/usr/local/bin/brew' if _brew_path_intel.stat.exists
+         else 'brew' }}
+
+- name: Install mise via Homebrew
+  community.general.homebrew:
+    name: mise
+    state: "{{ 'present' if mise_version | length == 0 else 'present' }}"
+  environment:
+    HOMEBREW_BREW_GIT_REMOTE: "https://mirrors.tuna.tsinghua.edu.cn/git/homebrew/brew.git"
+    HOMEBREW_CORE_GIT_REMOTE: "https://mirrors.tuna.tsinghua.edu.cn/git/homebrew/homebrew-core.git"
+  when: _brew_executable != 'brew'
+  notify: Reload shell RC
+
+- name: Install mise via Homebrew (fallback)
+  ansible.builtin.command: "{{ _brew_executable }} install mise"
+  when: _brew_executable == 'brew'
+  changed_when: true
+  notify: Reload shell RC

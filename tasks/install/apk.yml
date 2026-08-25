@@ -1,0 +1,7 @@
+---
+- name: Install mise via apk (Alpine)
+  community.general.apk:
+    name: mise
+    state: "{{ 'present' if mise_version | length == 0 else 'present' }}"
+  become: true
+  notify: Reload shell RC

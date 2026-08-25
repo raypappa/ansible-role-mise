@@ -1,0 +1,33 @@
+---
+- name: Get PowerShell profile path
+  ansible.builtin.win_shell: |
+    $profileDir = Split-Path $PROFILE -Parent
+    if (-not (Test-Path $profileDir)) { New-Item -ItemType Directory -Path $profileDir -Force | Out-Null }
+    Write-Output $PROFILE
+  register: _ps_profile_path
+  changed_when: false
+
+- name: Set PowerShell profile path fact
+  ansible.builtin.set_fact:
+    _ps_profile: "{{ _ps_profile_path.stdout_lines | first }}"
+
+- name: Ensure PowerShell profile exists
+  ansible.builtin.win_shell: |
+    if (-not (Test-Path '{{ _ps_profile }}')) {
+      New-Item -ItemType File -Path '{{ _ps_profile }}' -Force | Out-Null
+    }
+
+- name: Activate mise in PowerShell profile
+  ansible.builtin.win_lineinfile:
+    path: "{{ _ps_profile }}"
+    line: "(& mise activate pwsh) | Out-String | Invoke-Expression"
+    create: true
+  notify: Reload shell RC
+
+- name: Add mise shims to PATH (Windows PowerShell)
+  ansible.builtin.win_lineinfile:
+    path: "{{ _ps_profile }}"
+    line: "$env:PATH = \"$env:LOCALAPPDATA\\mise\\shims;$env:PATH\""
+    create: true
+  when: mise_install_scope == 'local'
+  notify: Reload shell RC

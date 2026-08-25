@@ -1,0 +1,40 @@
+---
+- name: Set GitHub release download URL
+  ansible.builtin.set_fact:
+    _mise_version_tag: "{{ 'v' + mise_version if mise_version | length > 0 else 'latest' }}"
+    _mise_download_url: >-
+      https://github.com/jdx/mise/releases/download/
+      {{ _mise_version_tag }}/
+      mise-{{ _mise_version_tag }}-windows-x64.zip
+
+- name: Create temp directory for download
+  ansible.windows.win_tempfile:
+    state: directory
+    suffix: .mise-install
+  register: _temp_dir
+
+- name: Download mise release
+  ansible.windows.win_get_url:
+    url: "{{ _mise_download_url }}"
+    dest: "{{ _temp_dir.path }}\\mise.zip"
+
+- name: Create install directory
+  ansible.windows.win_file:
+    path: "{{ mise_install_path | dirname }}"
+    state: directory
+
+- name: Extract mise binary
+  ansible.windows.win_unzip:
+    src: "{{ _temp_dir.path }}\\mise.zip"
+    dest: "{{ mise_install_path | dirname }}"
+    remote_src: true
+
+- name: Clean up temp directory
+  ansible.windows.win_file:
+    path: "{{ _temp_dir.path }}"
+    state: absent
+
+- name: Verify installation
+  ansible.builtin.win_shell: "& '{{ mise_install_path }}' --version"
+  register: _mise_verify
+  changed_when: false

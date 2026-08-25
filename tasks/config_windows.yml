@@ -1,0 +1,5 @@
+---
+- name: Create mise config directory
+  ansible.windows.win_file:
+    path: "{{ _mise_config_dir }}"
+    state: directory

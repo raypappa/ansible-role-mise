@@ -1,0 +1,58 @@
+---
+- name: Install bash completion
+  ansible.builtin.shell: |
+    set -o pipefail
+    {{ mise_install_path }} completion bash > {{ _completion_dir }}/mise
+  args:
+    executable: /bin/bash
+    creates: "{{ _completion_dir }}/mise"
+  when: mise_shell == 'bash'
+
+- name: Set bash completion directory
+  ansible.builtin.set_fact:
+    _completion_dir: "{{ mise_user_home }}/.local/share/bash-completion/completions"
+  when:
+    - mise_shell == 'bash'
+    - mise_completion_path | length == 0
+
+- name: Create bash completion directory
+  ansible.builtin.file:
+    path: "{{ _completion_dir }}"
+    state: directory
+    mode: "0755"
+  when: mise_shell == 'bash'
+
+- name: Set zsh completion path
+  ansible.builtin.set_fact:
+    _completion_dir: "{{ mise_completion_path if mise_completion_path | length > 0 else '/usr/local/share/zsh/site-functions' }}"
+  when: mise_shell == 'zsh'
+
+- name: Install zsh completion
+  ansible.builtin.shell: |
+    set -o pipefail
+    {{ mise_install_path }} completion zsh > {{ _completion_dir }}/_mise
+  args:
+    executable: /bin/bash
+    creates: "{{ _completion_dir }}/_mise"
+  when: mise_shell == 'zsh'
+
+- name: Set fish completion path
+  ansible.builtin.set_fact:
+    _fish_completion_dir: "{{ mise_user_home }}/.config/fish/completions"
+  when: mise_shell == 'fish'
+
+- name: Create fish completion directory
+  ansible.builtin.file:
+    path: "{{ _fish_completion_dir }}"
+    state: directory
+    mode: "0755"
+  when: mise_shell == 'fish'
+
+- name: Install fish completion
+  ansible.builtin.shell: |
+    set -o pipefail
+    {{ mise_install_path }} completion fish > {{ _fish_completion_dir }}/mise.fish
+  args:
+    executable: /bin/bash
+    creates: "{{ _fish_completion_dir }}/mise.fish"
+  when: mise_shell == 'fish'

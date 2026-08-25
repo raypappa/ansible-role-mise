@@ -1,0 +1,80 @@
+---
+- name: Check if curl is available
+  ansible.builtin.command: which curl
+  register: _curl_check
+  changed_when: false
+  failed_when: false
+
+- name: Ensure curl is installed
+  ansible.builtin.package:
+    name: curl
+    state: present
+  become: true
+  when: _curl_check.rc != 0
+
+- name: Check if mise is already installed
+  ansible.builtin.stat:
+    path: "{{ mise_install_path }}"
+  register: _mise_binary
+
+- name: Get installed mise version
+  ansible.builtin.command: "{{ mise_install_path }} --version"
+  register: _mise_installed_version
+  changed_when: false
+  failed_when: false
+  when: _mise_binary.stat.exists
+
+- name: Set version check fact
+  ansible.builtin.set_fact:
+    _mise_version_output: "{{ _mise_installed_version.stdout | default('') }}"
+    _mise_already_installed: >-
+      {{ _mise_binary.stat.exists and
+         (mise_version | length == 0 or mise_version in _mise_version_output) }}
+
+- name: Download and install mise
+  when: not _mise_already_installed
+  block:
+    - name: Create install directory
+      ansible.builtin.file:
+        path: "{{ mise_install_path | dirname }}"
+        state: directory
+        mode: "0755"
+        owner: "{{ mise_user if mise_install_scope == 'local' else omit }}"
+
+    - name: Build install environment dict
+      ansible.builtin.set_fact:
+        _mise_install_env:
+          MISE_INSTALL_PATH: "{{ mise_install_path }}"
+
+    - name: Add MISE_VERSION to env
+      ansible.builtin.set_fact:
+        _mise_install_env: "{{ _mise_install_env | combine({'MISE_VERSION': 'v' + mise_version}) }}"
+      when: mise_version | length > 0
+
+    - name: Add MISE_DATA_DIR to env
+      ansible.builtin.set_fact:
+        _mise_install_env: "{{ _mise_install_env | combine({'MISE_DATA_DIR': mise_data_dir}) }}"
+      when: mise_data_dir | length > 0
+
+    - name: Add MISE_CONFIG_DIR to env
+      ansible.builtin.set_fact:
+        _mise_install_env: "{{ _mise_install_env | combine({'MISE_CONFIG_DIR': mise_config_dir}) }}"
+      when: mise_config_dir | length > 0
+
+    - name: Download and install mise via curl
+      ansible.builtin.shell: |
+        set -o pipefail
+        curl https://mise.run | sh
+      args:
+        executable: /bin/bash
+      environment: "{{ _mise_install_env }}"
+      changed_when: true
+
+    - name: Verify mise installation
+      ansible.builtin.command: "{{ mise_install_path }} --version"
+      register: _mise_verify
+      changed_when: false
+
+    - name: Display installed version
+      ansible.builtin.debug:
+        msg: "Installed mise {{ _mise_verify.stdout }}"

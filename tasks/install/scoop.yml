@@ -1,0 +1,9 @@
+---
+- name: Include scoop installation tasks
+  ansible.builtin.include_tasks: scoop_install.yml
+  when: ansible_system == 'Win32NT'
+
+- name: Include scoop check tasks (non-Windows warning)
+  ansible.builtin.debug:
+    msg: "scoop installation method is only supported on Windows"
+  when: ansible_system != 'Win32NT'

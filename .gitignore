@@ -1,0 +1,13 @@
+*.pyc
+__pycache__/
+.molecule/
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+.eggs/
+.cache/
+.vagrant/
+*.retry
+*.log
+galaxy.yml

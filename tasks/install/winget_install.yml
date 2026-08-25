@@ -1,0 +1,32 @@
+---
+- name: Ensure winget is available
+  ansible.builtin.win_shell: |
+    $ErrorActionPreference = 'Stop'
+    try { Get-Command winget -ErrorAction Stop | Out-Null; exit 0 } catch { exit 1 }
+  register: _winget_check
+  changed_when: false
+  failed_when: false
+
+- name: Fail if winget not found
+  ansible.builtin.fail:
+    msg: "winget is required for mise_install_method=winget but was not found"
+  when: _winget_check.rc != 0
+
+- name: Set winget arguments for latest version
+  ansible.builtin.set_fact:
+    _winget_args: 'install --id jdx.mise --exact --accept-package-agreements --accept-source-agreements --silent'
+  when: mise_version | length == 0
+
+- name: Set winget arguments for specific version
+  ansible.builtin.set_fact:
+    _winget_args: >-
+      install --id jdx.mise --exact
+      --version {{ mise_version }}
+      --accept-package-agreements --accept-source-agreements --silent
+  when: mise_version | length > 0
+
+- name: Install mise via winget
+  ansible.builtin.win_shell: "winget {{ _winget_args }}"
+  register: _winget_install
+  changed_when: "'No applicable update' not in _winget_install.stdout"
+  failed_when: _winget_install.rc != 0

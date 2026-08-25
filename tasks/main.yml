@@ -1,0 +1,100 @@
+---
+# Validate installation method for the target OS
+- name: Validate installation method
+  ansible.builtin.assert:
+    that:
+      - mise_install_method in ['auto', 'curl', 'apt', 'dnf', 'brew', 'snap', 'npm', 'cargo', 'apk', 'scoop', 'winget', 'manual']
+    fail_msg: >
+      Invalid mise_install_method '{{ mise_install_method }}'.
+      Supported values: auto, curl, apt, dnf, brew, snap, npm, cargo, apk, scoop, winget, manual
+
+# Resolve auto to platform-appropriate method
+- name: Resolve installation method (Linux)
+  ansible.builtin.set_fact:
+    _mise_resolved_method: >-
+      {{ 'apt' if ansible_os_family == 'Debian' and ansible_distribution != 'Alpine'
+         else 'apk' if ansible_distribution == 'Alpine'
+         else 'dnf' if ansible_os_family == 'RedHat' and ansible_distribution_major_version | int >= 34
+         else 'dnf' if ansible_distribution == 'Fedora'
+         else 'curl'
+      }}
+  when:
+    - mise_install_method == 'auto'
+    - ansible_system != 'Win32NT'
+
+- name: Resolve installation method (Windows)
+  ansible.builtin.set_fact:
+    _mise_resolved_method: scoop
+  when:
+    - mise_install_method == 'auto'
+    - ansible_system == 'Win32NT'
+
+- name: Use specified installation method
+  ansible.builtin.set_fact:
+    _mise_resolved_method: "{{ mise_install_method }}"
+  when: mise_install_method != 'auto'
+
+# Derive default install path if not explicitly set
+- name: Set default install path (Linux/macOS)
+  ansible.builtin.set_fact:
+    mise_install_path: >-
+      {{ '/usr/local/bin/mise' if mise_install_scope == 'global'
+         else mise_user_home + '/.local/bin/mise' }}
+  when:
+    - mise_install_path | length == 0
+    - ansible_system != 'Win32NT'
+    - _mise_resolved_method not in ['apt', 'dnf', 'snap', 'brew', 'apk']
+
+- name: Set default install path (Windows scoop)
+  ansible.builtin.set_fact:
+    mise_install_path: ""
+  when:
+    - mise_install_path | length == 0
+    - ansible_system == 'Win32NT'
+    - _mise_resolved_method == 'scoop'
+
+- name: Set default install path (Windows winget)
+  ansible.builtin.set_fact:
+    mise_install_path: ""
+  when:
+    - mise_install_path | length == 0
+    - ansible_system == 'Win32NT'
+    - _mise_resolved_method == 'winget'
+
+- name: Set default install path (Windows manual)
+  ansible.builtin.set_fact:
+    mise_install_path: "C:\\Users\\{{ mise_user }}\\bin\\mise.exe"
+  when:
+    - mise_install_path | length == 0
+    - ansible_system == 'Win32NT'
+    - _mise_resolved_method == 'manual'
+
+# Derive shell if set to auto
+- name: Detect shell from ansible shell
+  ansible.builtin.set_fact:
+    mise_shell: >-
+      {{ 'powershell' if 'powershell' in (ansible_shell_executable | default(''))
+         else 'pwsh' if 'pwsh' in (ansible_shell_executable | default(''))
+         else 'fish' if 'fish' in (ansible_shell_executable | default(''))
+         else 'zsh' if 'zsh' in (ansible_shell_executable | default(''))
+         else 'bash'
+      }}
+  when: mise_shell == 'auto'
+
+# Include installation tasks
+- name: Install mise
+  ansible.builtin.include_tasks: "install/{{ _mise_resolved_method }}.yml"
+
+# Include shell activation tasks
+- name: Activate mise in shell
+  ansible.builtin.include_tasks: "shell.yml"
+  when: mise_activate_shell
+
+# Include configuration tasks
+- name: Configure mise
+  ansible.builtin.include_tasks: "config.yml"
+
+# Include autocompletion tasks
+- name: Install autocompletion
+  ansible.builtin.include_tasks: "completion.yml"
+  when: mise_install_completion

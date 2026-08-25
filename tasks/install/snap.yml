@@ -1,0 +1,8 @@
+---
+- name: Install mise via Snap
+  community.general.snap:
+    name: mise
+    classic: true
+    state: present
+  become: true
+  notify: Reload shell RC

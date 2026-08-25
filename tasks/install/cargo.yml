@@ -1,0 +1,28 @@
+---
+- name: Ensure cargo is available
+  ansible.builtin.command: which cargo
+  register: _cargo_check
+  changed_when: false
+  failed_when: false
+
+- name: Fail if cargo not found
+  ansible.builtin.fail:
+    msg: "cargo is required for mise_install_method=cargo but was not found"
+  when: _cargo_check.rc != 0
+
+- name: Install mise via cargo
+  ansible.builtin.command: cargo install --locked mise
+  register: _cargo_install
+  changed_when: "'Installing' in _cargo_install.stderr or 'Installing' in _cargo_install.stdout"
+  notify: Reload shell RC
+
+- name: Move cargo binary to install path
+  ansible.builtin.copy:
+    src: "{{ ansible_env.HOME }}/.cargo/bin/mise"
+    dest: "{{ mise_install_path }}"
+    remote_src: true
+    mode: "0755"
+    owner: "{{ mise_user }}"
+  when:
+    - mise_install_path | length > 0
+    - mise_install_path != ansible_env.HOME + '/.cargo/bin/mise'

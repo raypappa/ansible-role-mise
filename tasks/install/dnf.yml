@@ -1,0 +1,14 @@
+---
+- name: Enable mise COPR repository
+  community.general.copr:
+    name: jdxcode/mise
+    state: enabled
+  become: true
+  when: ansible_distribution != 'Alpine'
+
+- name: Install mise via DNF
+  ansible.builtin.dnf:
+    name: "{{ 'mise=' + mise_version if mise_version | length > 0 else 'mise' }}"
+    state: "{{ 'present' if mise_version | length > 0 else 'latest' }}"
+  become: true
+  notify: Reload shell RC

@@ -1,0 +1,38 @@
+---
+# Determine config directory path
+- name: Set config directory
+  ansible.builtin.set_fact:
+    _mise_config_dir: "{{ mise_config_dir if mise_config_dir | length > 0 else mise_user_home + '/.config/mise' }}"
+
+- name: Include Windows config tasks
+  ansible.builtin.include_tasks: config_windows.yml
+  when: ansible_system == 'Win32NT'
+
+- name: Include Unix config tasks
+  ansible.builtin.include_tasks: config_unix.yml
+  when: ansible_system != 'Win32NT'
+
+# Trust all configs if requested
+- name: Trust all mise config files
+  ansible.builtin.command: "{{ mise_install_path }} trust -a"
+  changed_when: false
+  failed_when: false
+  when: mise_trust_all_configs
+
+# Apply settings
+- name: Apply mise settings
+  mise_settings:
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
+    executable: "{{ mise_install_path }}"
+  loop: "{{ mise_settings | dict2items }}"
+  when: mise_settings | length > 0
+
+# Apply environment variables
+- name: Apply mise environment variables
+  ansible.builtin.command: >-
+    {{ mise_install_path }} set --{{ 'global' if mise_install_scope == 'global' else 'local' }}
+    {{ item.key }}={{ item.value }}
+  loop: "{{ mise_env | dict2items }}"
+  changed_when: true
+  when: mise_env | length > 0

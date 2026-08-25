@@ -1,0 +1,65 @@
+---
+# mise installation method: "curl" (default), "apt", "dnf", "brew", "snap", "npm", "cargo", "apk"
+# On Windows: "scoop", "winget", "manual", "npm"
+mise_install_method: auto
+
+# mise version to install (e.g. "2025.12.0"). Leave empty for latest.
+mise_version: ""
+
+# Installation path for the mise binary
+# Linux/macOS default: ~/.local/bin/mise
+# Windows default: uses scoop/winget default or ~/bin/mise for manual
+mise_install_path: ""
+
+# Install scope: "global" (system-wide) or "local" (per-user)
+mise_install_scope: local
+
+# Target user for local installs (defaults to ansible_user)
+mise_user: "{{ ansible_user_id }}"
+
+# Target user's home directory for local installs
+mise_user_home: "{{ ansible_env.HOME if mise_install_scope == 'local' else '/usr/local' }}"
+
+# Shell to activate mise in: "bash", "zsh", "fish", "powershell"
+# Auto-detected from ansible_shell_executable if not set
+mise_shell: auto
+
+# Whether to activate mise in the user's shell RC file
+mise_activate_shell: true
+
+# mise data directory (XDG_DATA_HOME/mise)
+# Windows: %LOCALAPPDATA%\mise
+mise_data_dir: ""
+
+# mise config directory (XDG_CONFIG_HOME/mise)
+# Windows: %USERPROFILE%\.config\mise
+mise_config_dir: ""
+
+# mise cache directory (XDG_CACHE_HOME/mise)
+# Windows: %LOCALAPPDATA%\mise\cache
+mise_cache_dir: ""
+
+# mise settings to configure
+# Example:
+# mise_settings:
+#   auto_update: true
+#   trusted_config_paths:
+#     - "/"
+mise_settings: {}
+
+# mise environment variables
+# Example:
+# mise_env:
+#   MISE_JOBS: "4"
+mise_env: {}
+
+# Whether to trust all config files automatically
+mise_trust_all_configs: false
+
+# Whether to install autocompletion scripts
+mise_install_completion: false
+
+# Shell completion path (auto-detected if empty)
+# Linux: ~/.local/share/bash-completion/completions/ or /usr/local/share/zsh/site-functions/
+# Windows: not applicable for scoop/winget (auto-installed)
+mise_completion_path: ""

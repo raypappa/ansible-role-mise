@@ -1,0 +1,8 @@
+---
+- name: Restart shell session
+  ansible.builtin.debug:
+    msg: "Shell session needs to be restarted for mise activation to take effect"
+
+- name: Reload shell RC
+  ansible.builtin.debug:
+    msg: "Shell RC file updated. Users will need to source it or start a new session."

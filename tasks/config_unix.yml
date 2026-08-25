@@ -1,0 +1,7 @@
+---
+- name: Create mise config directory
+  ansible.builtin.file:
+    path: "{{ _mise_config_dir }}"
+    state: directory
+    mode: "0755"
+    owner: "{{ mise_user }}"
