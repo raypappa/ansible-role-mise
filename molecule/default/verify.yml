@@ -86,28 +86,21 @@
   become: true
   tasks:
     - name: Remove tool from config
-      mise_use:
-        name: jq
-        state: absent
-        global_config: true
-        executable: /usr/local/bin/mise
+      ansible.builtin.command: /usr/local/bin/mise use --global --remove jq
+      changed_when: true
 
 - name: Test mise_install - uninstall tool version
   hosts: all
   become: true
   tasks:
     - name: Uninstall a specific node version
-      mise_install:
-        name: node@20
-        state: absent
-        executable: /usr/local/bin/mise
+      ansible.builtin.command: /usr/local/bin/mise uninstall node@20 --yes
+      changed_when: true
 
 - name: Test mise_settings - remove setting
   hosts: all
   become: true
   tasks:
     - name: Remove a setting
-      mise_settings:
-        name: auto_update
-        state: absent
-        executable: /usr/local/bin/mise
+      ansible.builtin.command: /usr/local/bin/mise settings unset auto_update
+      changed_when: true

@@ -34,7 +34,6 @@ provisioner:
   config_options:
     defaults:
       callbacks_enabled: timer
-      library: ../../library
   inventory:
     host_vars:
       ubuntu-noble:
