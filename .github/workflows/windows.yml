@@ -61,11 +61,20 @@ jobs:
         run: |
           pip install ansible-core pywinrm
 
+      - name: Set UTF-8 system locale
+        shell: pwsh
+        run: |
+          $regPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Nls\CodePage"
+          Set-ItemProperty -Path $regPath -Name "ACP" -Value "65001"
+          Set-ItemProperty -Path $regPath -Name "OEMCP" -Value "65001"
+          Set-ItemProperty -Path $regPath -Name "MACCP" -Value "65001"
+          $env:PYTHONUTF8 = "1"
+          python -c "import locale; print(locale.getpreferredencoding(False))"
+
       - name: Install Ansible collections
         shell: pwsh
         run: |
           $env:PYTHONUTF8 = "1"
-          chcp 65001
           ansible-galaxy collection install ansible.windows
           ansible-galaxy collection install community.windows
 
@@ -117,7 +126,6 @@ jobs:
         shell: pwsh
         run: |
           $env:PYTHONUTF8 = "1"
-          chcp 65001
           ansible-playbook test_windows.yml -vvv
 
       - name: Clean up
