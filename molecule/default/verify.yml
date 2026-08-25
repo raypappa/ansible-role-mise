@@ -79,3 +79,35 @@
         that:
           - _mise_ls.rc == 0
         fail_msg: "mise ls-remote failed"
+
+# Test destructive operations in a separate play (after verify assertions)
+- name: Test mise_use - remove tool from config
+  hosts: all
+  become: true
+  tasks:
+    - name: Remove tool from config
+      mise_use:
+        name: jq
+        state: absent
+        global_config: true
+        executable: /usr/local/bin/mise
+
+- name: Test mise_install - uninstall tool version
+  hosts: all
+  become: true
+  tasks:
+    - name: Uninstall a specific node version
+      mise_install:
+        name: node@20
+        state: absent
+        executable: /usr/local/bin/mise
+
+- name: Test mise_settings - remove setting
+  hosts: all
+  become: true
+  tasks:
+    - name: Remove a setting
+      mise_settings:
+        name: auto_update
+        state: absent
+        executable: /usr/local/bin/mise

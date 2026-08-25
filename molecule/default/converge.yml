@@ -38,13 +38,6 @@
         global_config: true
         executable: /usr/local/bin/mise
 
-    - name: Remove tool from config
-      mise_use:
-        name: jq
-        state: absent
-        global_config: true
-        executable: /usr/local/bin/mise
-
 - name: Test mise_install - install tool versions
   hosts: all
   become: true
@@ -57,12 +50,6 @@
     - name: Install latest rust
       mise_install:
         name: rust@latest
-        executable: /usr/local/bin/mise
-
-    - name: Uninstall a specific node version
-      mise_install:
-        name: node@20
-        state: absent
         executable: /usr/local/bin/mise
 
 - name: Test mise_settings - configure mise
@@ -79,10 +66,4 @@
       mise_settings:
         name: trusted_config_paths
         value: "/"
-        executable: /usr/local/bin/mise
-
-    - name: Remove a setting
-      mise_settings:
-        name: auto_update
-        state: absent
         executable: /usr/local/bin/mise
