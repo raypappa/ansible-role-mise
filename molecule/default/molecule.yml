@@ -28,6 +28,7 @@ platforms:
 
 provisioner:
   name: ansible
+  role_name: mise
   become: true
   become_method: sudo
   config_options:
