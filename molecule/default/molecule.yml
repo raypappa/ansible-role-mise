@@ -31,6 +31,8 @@ provisioner:
   role_name: mise
   become: true
   become_method: sudo
+  env:
+    ANSIBLE_LIBRARY: "{{ molecule_project_directory }}/library"
   config_options:
     defaults:
       callbacks_enabled: timer
