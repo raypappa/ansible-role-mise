@@ -70,9 +70,8 @@ jobs:
           $env:PYTHONUTF8 = "1"
           python -c "import locale; print(locale.getpreferredencoding(False))"
           if (-not (Test-Path "C:\hostedtoolcache\windows\Python\3.12.10\x64\Lib\site-packages\fcntl.py")) {
-            @"
-import error
-"@ | Out-File -FilePath "C:\hostedtoolcache\windows\Python\3.12.10\x64\Lib\site-packages\fcntl.py" -Encoding utf8
+            "import error
+" | Out-File -FilePath "C:\hostedtoolcache\windows\Python\3.12.10\x64\Lib\site-packages\fcntl.py" -Encoding utf8
           }
 
       - name: Install Ansible collections
