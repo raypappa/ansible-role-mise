@@ -209,7 +209,14 @@ def main():
         current_value = _get_setting(mise_path, setting_name, use_local, module)
 
         # Normalize value for comparison
-        if value == current_value:
+        # List-type settings return a list from mise, but may be set with a string
+        compare_value = value
+        if isinstance(current_value, list) and not isinstance(value, list):
+            compare_value = [value]
+        elif isinstance(current_value, list) and isinstance(value, list):
+            compare_value = value
+
+        if compare_value == current_value:
             module.exit_json(
                 changed=False,
                 name=setting_name,
