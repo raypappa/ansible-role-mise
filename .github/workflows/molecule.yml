@@ -37,16 +37,9 @@ jobs:
         run: ansible-lint
 
   molecule:
-    name: "Molecule (${{ matrix.distro }})"
+    name: Molecule
     needs: lint
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        distro:
-          - ubuntu-noble
-          - debian-bookworm
-          - fedora-latest
 
     steps:
       - name: Check out code
@@ -62,14 +55,14 @@ jobs:
         run: |
           pip install ansible-core molecule molecule-plugins[docker]
 
-      - name: Run Molecule on ${{ matrix.distro }}
-        run: molecule test -- --limit ${{ matrix.distro }}
+      - name: Run Molecule tests
+        run: molecule test
 
       - name: Upload logs on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: molecule-logs-${{ matrix.distro }}
+          name: molecule-logs
           path: |
             ~/.cache/molecule/
             /tmp/molecule-*
