@@ -157,8 +157,14 @@ def _is_installed(mise_path, tool_name, module):
         return False
 
     try:
-        tools = json.loads(stdout) if stdout.strip() else {}
-        return tool_name in tools and len(tools[tool_name]) > 0
+        data = json.loads(stdout) if stdout.strip() else {}
+        # mise ls --json <tool> returns a list of version entries
+        if isinstance(data, list):
+            return len(data) > 0
+        # mise ls --json returns a dict keyed by tool name
+        if isinstance(data, dict):
+            return tool_name in data and len(data[tool_name]) > 0
+        return False
     except (ValueError, KeyError):
         return False
 
