@@ -58,10 +58,9 @@ jobs:
           cache: "pip"
 
       - name: Install Ansible
-        run: |
-          pip install ansible-core pywinrm
+        run: pip install ansible-core pywinrm
 
-      - name: Set UTF-8 system locale
+      - name: Set UTF-8 system locale and install fcntl stub
         shell: pwsh
         run: |
           $regPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Nls\CodePage"
@@ -70,6 +69,11 @@ jobs:
           Set-ItemProperty -Path $regPath -Name "MACCP" -Value "65001"
           $env:PYTHONUTF8 = "1"
           python -c "import locale; print(locale.getpreferredencoding(False))"
+          if (-not (Test-Path "C:\hostedtoolcache\windows\Python\3.12.10\x64\Lib\site-packages\fcntl.py")) {
+            @"
+import error
+"@ | Out-File -FilePath "C:\hostedtoolcache\windows\Python\3.12.10\x64\Lib\site-packages\fcntl.py" -Encoding utf8
+          }
 
       - name: Install Ansible collections
         shell: pwsh
