@@ -60,15 +60,15 @@ jobs:
       - name: Install Ansible
         run: pip install ansible-core pywinrm
 
-      - name: Set UTF-8 system locale
-        shell: pwsh
+      - name: Set UTF-8 system locale and install fcntl stub
         run: |
-          $regPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Nls\CodePage"
-          Set-ItemProperty -Path $regPath -Name "ACP" -Value "65001"
-          Set-ItemProperty -Path $regPath -Name "OEMCP" -Value "65001"
-          Set-ItemProperty -Path $regPath -Name "MACCP" -Value "65001"
-          $env:PYTHONUTF8 = "1"
-          python -c "import locale; print(locale.getpreferredencoding(False))"
+          import sys, os
+          fcntl_path = os.path.join(sys.prefix, "Lib", "site-packages", "fcntl.py")
+          if not os.path.exists(fcntl_path):
+            with open(fcntl_path, "w") as f:
+              f.write("import error\n")
+          import locale
+          print(locale.getpreferredencoding(False))
 
       - name: Create test playbook
         shell: pwsh
