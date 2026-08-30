@@ -209,22 +209,24 @@ def _find_mise(module):
     if exe and os.path.isfile(exe) and os.access(exe, os.X_OK):
         return exe
 
-    rc, _, _ = module.get_bin_path("mise", required=False)
-    if rc == 0:
-        return module.get_bin_path("mise", required=True)
+    path = module.get_bin_path("mise", required=False)
+    if path:
+        return path
 
     module.fail_json(
         msg="mise executable not found. Install mise or specify the 'executable' parameter."
     )
 
 
-def _get_current_tools(mise_path, scope_flag, module):
+def _get_current_tools(mise_path, scope_flag, module, cwd=None):
     """Get the current tools from mise ls --json."""
     cmd = [mise_path, "ls", "--json"]
-    if scope_flag:
+    if scope_flag in ("--global", "--system"):
         cmd.append(scope_flag)
+    # --path/--env scopes have no `mise ls` flag; cwd makes mise resolve
+    # the config file at that location instead.
 
-    rc, stdout, stderr = module.run_command(cmd)
+    rc, stdout, stderr = module.run_command(cmd, cwd=cwd)
     if rc != 0:
         module.fail_json(msg="Failed to list mise tools: {0}".format(stderr))
 
@@ -279,6 +281,7 @@ def _parse_tool_name(name_str):
 def _run_mise_use(
     module, mise_path, name, use_global, use_system, path, env, force, pin, fuzzy
 ):
+    cwd = path if (path and not use_global and not use_system) else None
     """Run mise use for a single tool and return result dict."""
     tool_name, version, options_str = _parse_tool_name(name)
 
@@ -294,7 +297,7 @@ def _run_mise_use(
         scope_flag = "--env"
 
     # Check current state
-    current_tools = _get_current_tools(mise_path, scope_flag, module)
+    current_tools = _get_current_tools(mise_path, scope_flag, module, cwd=cwd)
     is_in_config = _tool_is_in_config(current_tools, tool_name)
 
     if is_in_config and not force:
@@ -353,6 +356,7 @@ def _run_mise_use(
 def _run_mise_unuse(
     module, mise_path, name, use_global, use_system, path, env, no_prune
 ):
+    cwd = path if (path and not use_global and not use_system) else None
     """Run mise unuse for a single tool and return result dict."""
     tool_name, version, options_str = _parse_tool_name(name)
 
@@ -368,7 +372,7 @@ def _run_mise_unuse(
         scope_flag = "--env"
 
     # Check current state
-    current_tools = _get_current_tools(mise_path, scope_flag, module)
+    current_tools = _get_current_tools(mise_path, scope_flag, module, cwd=cwd)
     is_in_config = _tool_is_in_config(current_tools, tool_name)
 
     if not is_in_config:
