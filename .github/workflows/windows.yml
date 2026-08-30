@@ -28,13 +28,6 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v4
 
-      - name: Set UTF-8 locale
-        shell: pwsh
-        run: |
-          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $env:PYTHONUTF8 = "1"
-          echo "PYTHONUTF8=1" >> $env:GITHUB_ENV
-
       - name: Set up Python and uv
         uses: astral-sh/setup-uv@v5
         with:
@@ -75,10 +68,11 @@ jobs:
           "@ | Out-File -FilePath test_windows.yml -Encoding utf8
 
       - name: Run test playbook
-        shell: pwsh
-        run: |
-          $env:PYTHONUTF8 = "1"
-          ansible-playbook test_windows.yml -vvv
+        shell: bash
+        env:
+          PYTHONUTF8: "1"
+          PYTHONIOENCODING: "utf-8"
+        run: ansible-playbook test_windows.yml -vvv
 
       - name: Clean up
         if: always()
