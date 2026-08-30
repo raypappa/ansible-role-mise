@@ -5,6 +5,7 @@ ignore:
   - .git/
   - .github/
   - .ansible/
+  - .venv/
 
 rules:
   line-length:
