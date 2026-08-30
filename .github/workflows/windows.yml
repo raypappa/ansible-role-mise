@@ -40,7 +40,9 @@ jobs:
       - name: Create fcntl stub
         shell: pwsh
         run: |
-          $fcntlPath = "${env:USERPROFILE}\AppData\Local\Programs\Python\Python312\Lib\site-packages\fcntl.py"
+          $fcntlDir = "${env:USERPROFILE}\AppData\Local\Programs\Python\Python312\Lib\site-packages"
+          if (-not (Test-Path $fcntlDir)) { mkdir $fcntlDir }
+          $fcntlPath = Join-Path $fcntlPath "fcntl.py"
           if (-not (Test-Path $fcntlPath)) {
             "import error" | Out-File -FilePath $fcntlPath -Encoding utf8
           }
