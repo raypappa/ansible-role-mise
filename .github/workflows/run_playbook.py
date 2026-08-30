@@ -36,9 +36,6 @@ if platform.system() == "Windows":
 if platform.system() == "Windows":
     _original_find_library = ctypes.util.find_library
 
-    # Load msvcrt for wcwidth
-    _msvcrt = ctypes.CDLL("msvcrt")
-
     def _patched_find_library(name):
         if name == "c":
             return "ucrtbase"
@@ -46,13 +43,15 @@ if platform.system() == "Windows":
 
     ctypes.util.find_library = _patched_find_library
 
-    # After Ansible loads _LIBC, we need wcwidth to come from msvcrt
-    # Hook into ctypes.CDLL attribute access to inject wcwidth
+    # Pre-resolve msvcrt.wcwidth before patching CDLL.__getattr__
+    _msvcrt = ctypes.CDLL("msvcrt")
+    _msvcrt_wcwidth = _msvcrt.wcwidth  # resolved once, no recursion
+
     _orig_cdll_getattr = ctypes.CDLL.__getattr__  # type: ignore[attr-defined]
 
     def _patched_cdll_getattr(self, name):  # type: ignore[misc]
         if name == "wcwidth":
-            return _msvcrt.wcwidth
+            return _msvcrt_wcwidth
         try:
             return _orig_cdll_getattr(self, name)
         except AttributeError:
