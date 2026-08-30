@@ -97,7 +97,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Login to Ansible Galaxy
-        uses: Ansible.awesome-actions@v2
+        uses: ansible/awesome-actions@v2
         with:
           galaxy-token: ${{ secrets.GALAXY_TOKEN }}
 
