@@ -11,6 +11,15 @@ import sys
 # --- Patch 1: locale encoding ---
 _original_getlocale = locale.getlocale
 
+# --- Patch 0: os.path.sep for Windows ---
+# Ansible's dataloader uses os.path.sep in regex patterns without escaping.
+# On Windows, sep is '\\' which breaks regex. Patch to use '/'.
+if platform.system() == "Windows":
+    import os
+
+    os.path.sep = "/"
+    os.sep = "/"
+
 
 def _patched_getlocale(*args, **kwargs):
     result = _original_getlocale(*args, **kwargs)
