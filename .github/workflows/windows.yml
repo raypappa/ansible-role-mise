@@ -37,14 +37,24 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
-      - name: Install mise
+      - name: Install mise (scoop)
+        if: matrix.method == 'scoop'
         shell: pwsh
         run: |
-          switch ("${{ matrix.method }}") {
-            "scoop" { scoop install mise }
-            "winget" { winget install jdx.mise }
-            "manual" { irm https://mise.run | pwsh }
-          }
+          scoop install mise
+
+      - name: Install mise (winget)
+        if: matrix.method == 'winget'
+        shell: pwsh
+        run: |
+          winget install --id jdx.mise --accept-package-agreements --accept-source-agreements
+
+      - name: Install mise (manual)
+        if: matrix.method == 'manual'
+        shell: bash
+        run: |
+          curl https://mise.run | bash
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Create test playbook
         shell: pwsh
