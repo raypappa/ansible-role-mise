@@ -6,7 +6,7 @@ readme = "README.md"
 authors = [
   { name = "Craig Davis", email = "181794460+raypappa@users.noreply.github.com" },
 ]
-requires-python = "~=3.13.0"
+requires-python = "~=3.12.0"
 dependencies = [
     "ansible-core>=2.21.3",
     "ansible-lint>=26.8.0",
