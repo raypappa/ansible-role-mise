@@ -32,7 +32,7 @@ jobs:
         run: uv sync
 
       - name: Run pre-commit
-        uses: pre-commit/action@v4
+        uses: pre-commit/action@v3
 
   molecule:
     name: Molecule
