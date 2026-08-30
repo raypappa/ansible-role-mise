@@ -1,0 +1,57 @@
+---
+name: Publish to Ansible Galaxy
+
+on:
+  push:
+    tags:
+      - "v*.*.*"  # Semantic versioning tags
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          enable-cache: true
+
+      - name: Install linting tools
+        run: pip install ansible-core ansible-lint yamllint
+
+      - name: Run yamllint
+        run: yamllint .
+
+      - name: Run ansible-lint
+        run: ansible-lint
+
+  publish:
+    name: Publish to Galaxy
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          enable-cache: true
+
+      - name: Install Ansible
+        run: pip install ansible-core
+
+      - name: Import role to Ansible Galaxy
+        env:
+          GALAXY_API_KEY: ${{ secrets.GALAXY_API_KEY }}
+        run: |
+          ansible-galaxy role import \
+            --api-key $GALAXY_API_KEY \
+            --force \
+            --role-name mise \
+            ${{ github.repository }}

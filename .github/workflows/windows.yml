@@ -32,7 +32,7 @@ jobs:
         uses: astral-sh/setup-uv@v5
         with:
           python-version: "3.12"
-          cache: "pip"
+          enable-cache: true
 
       - name: Install dependencies
         run: uv sync
