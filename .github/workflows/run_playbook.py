@@ -1,4 +1,4 @@
-# mypy: disable-error-code="method-assign"
+# mypy: disable-error-code="method-assign,attr-defined"
 """Wrapper to run ansible-playbook on Windows with necessary Unix stubs."""
 
 import ctypes
@@ -98,12 +98,37 @@ if platform.system() == "Windows":
             "getrlimit": lambda *a, **kw: (1024, 1024),
             "setrlimit": lambda *a, **kw: None,
         },
+        "grp": {
+            "getgrnam": lambda *a, **kw: ("", "", 0, []),
+            "getgrgid": lambda *a, **kw: ("", "", 0, []),
+        },
+        "pwd": {
+            "getpwnam": lambda *a, **kw: ("", "", 0, 0, "", "", ""),
+            "getpwuid": lambda *a, **kw: ("", "", 0, 0, "", "", ""),
+        },
+        "crypt": {
+            "crypt": lambda *a, **kw: "",
+        },
+        "syslog": {
+            "LOG_EMERG": 0,
+            "LOG_ALERT": 1,
+            "LOG_CRIT": 2,
+            "LOG_ERR": 3,
+            "LOG_WARNING": 4,
+            "LOG_NOTICE": 5,
+            "LOG_INFO": 6,
+            "LOG_DEBUG": 7,
+            "syslog": lambda *a, **kw: None,
+            "openlog": lambda *a, **kw: None,
+            "closelog": lambda *a, **kw: None,
+            "setlogmask": lambda *a, **kw: None,
+        },
     }
 
     for mod_name, attrs in _stub_modules.items():
         if mod_name not in sys.modules:
             mod = types.ModuleType(mod_name)
-            for k, v in attrs.items():
+            for k, v in attrs.items():  # type: ignore[attr-defined]
                 setattr(mod, k, v)
             sys.modules[mod_name] = mod
 
