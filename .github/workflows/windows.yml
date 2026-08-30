@@ -40,7 +40,9 @@ jobs:
       - name: Create fcntl stub
         shell: pwsh
         run: |
-          $fcntlPath = "C:\hostedtoolcache\windows\Python\3.12.10\x64\Lib\site-packages\fcntl.py"
+          $sitePackages = python -c "import site; print(site.getsitepackages()[0])"
+          $fcntlPath = Join-Path $sitePackages "fcntl.py"
+          Write-Host "Creating fcntl stub at: $fcntlPath"
           if (-not (Test-Path $fcntlPath)) {
             "import error" | Out-File -FilePath $fcntlPath -Encoding utf8
           }
@@ -78,6 +80,7 @@ jobs:
         if: always()
         shell: pwsh
         run: |
-          if (Test-Path "C:\Users\${{ env.USERNAME }}\AppData\Local\mise") {
-            Remove-Item -Path "C:\Users\${{ env.USERNAME }}\AppData\Local\mise" -Recurse -Force
+          $misePath = "C:\Users\$env:USERNAME\AppData\Local\mise"
+          if (Test-Path $misePath) {
+            Remove-Item -Path $misePath -Recurse -Force
           }
