@@ -15,8 +15,8 @@ env:
   PYTHONUTF8: "1"
 
 jobs:
-  pre-commit:
-    name: Pre-commit
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
@@ -30,27 +30,12 @@ jobs:
 
       - name: Install dependencies
         run: uv sync
+
+      - name: Install pre-commit
+        run: pip install pre-commit
 
       - name: Run pre-commit
-        uses: pre-commit/action@v3
-
-  molecule:
-    name: Molecule
-    needs: pre-commit
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v4
-
-      - name: Set up Python and uv
-        uses: astral-sh/setup-uv@v5
-        with:
-          python-version: "3.12"
-          cache: "pip"
-
-      - name: Install dependencies
-        run: uv sync
+        run: pre-commit run --all-files
 
       - name: Run Molecule tests
         run: molecule test
