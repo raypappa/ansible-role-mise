@@ -72,7 +72,9 @@ jobs:
         env:
           PYTHONUTF8: "1"
           PYTHONIOENCODING: "utf-8"
-        run: ansible-playbook test_windows.yml -vvv
+        run: |
+          chcp 65001
+          ansible-playbook test_windows.yml -vvv
 
       - name: Clean up
         if: always()
