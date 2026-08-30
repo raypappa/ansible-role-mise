@@ -43,9 +43,15 @@ jobs:
           $sitePackages = python -c "import site; print(site.getsitepackages()[0])"
           $fcntlPath = Join-Path $sitePackages "fcntl.py"
           Write-Host "Creating fcntl stub at: $fcntlPath"
-          if (-not (Test-Path $fcntlPath)) {
-            "import error" | Out-File -FilePath $fcntlPath -Encoding utf8
-          }
+          @"
+          # fcntl stub for Windows - provides dummy constants used by Ansible
+          F_SETFL = 4
+          O_NONBLOCK = 2048
+          def fcntl(*args, **kwargs):
+              pass
+          def ioctl(*args, **kwargs):
+              return 0
+          "@ | Out-File -FilePath $fcntlPath -Encoding utf8 -Force
 
       - name: Create test playbook
         shell: pwsh
