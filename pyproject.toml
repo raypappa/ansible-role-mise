@@ -19,5 +19,6 @@ dependencies = [
 [tool.ruff]
 # Ignore E402 (module level import not at top of file) for Ansible modules
 # This is standard pattern for Ansible modules with DOCUMENTATION/EXAMPLES/RETURN
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "library/*.py" = ["E402"]
+".github/workflows/run_playbook.py" = ["E402"]
