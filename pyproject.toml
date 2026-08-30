@@ -15,3 +15,9 @@ dependencies = [
     "testinfra>=6.0.0",
     "yamllint>=1.38.0",
 ]
+
+[tool.ruff]
+# Ignore E402 (module level import not at top of file) for Ansible modules
+# This is standard pattern for Ansible modules with DOCUMENTATION/EXAMPLES/RETURN
+[tool.ruff.per-file-ignores]
+"library/*.py" = ["E402"]

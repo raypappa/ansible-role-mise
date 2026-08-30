@@ -37,7 +37,7 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
-- name: Create fcntl stub
+      - name: Create fcntl stub
         shell: pwsh
         run: |
           $fcntlPath = "C:\hostedtoolcache\windows\Python\3.12.10\x64\Lib\site-packages\fcntl.py"
