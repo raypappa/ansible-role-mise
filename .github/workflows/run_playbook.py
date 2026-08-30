@@ -43,15 +43,21 @@ if platform.system() == "Windows":
 
     ctypes.util.find_library = _patched_find_library
 
-    # Pre-resolve msvcrt.wcwidth before patching CDLL.__getattr__
-    _msvcrt = ctypes.CDLL("msvcrt")
-    _msvcrt_wcwidth = _msvcrt.wcwidth  # resolved once, no recursion
+    # Stub wcwidth: POSIX function not available on Windows.
+    # Return 1 for printable chars, 0 for control chars, -1 for non-printable.
+    def _wcwidth_stub(ch):
+        cp = ord(ch)
+        if cp == 0:
+            return 0
+        if cp < 32 or (0x7F <= cp < 0xA0):
+            return -1
+        return 1
 
     _orig_cdll_getattr = ctypes.CDLL.__getattr__  # type: ignore[attr-defined]
 
     def _patched_cdll_getattr(self, name):  # type: ignore[misc]
         if name == "wcwidth":
-            return _msvcrt_wcwidth
+            return _wcwidth_stub
         try:
             return _orig_cdll_getattr(self, name)
         except AttributeError:
