@@ -1,6 +1,8 @@
 """Wrapper to run ansible-playbook with UTF-8 locale on Windows."""
 
 import locale
+import multiprocessing
+import platform
 import sys
 
 # Monkey-patch locale to report UTF-8
@@ -15,6 +17,17 @@ def _patched_getlocale(*args, **kwargs):
 
 
 locale.getlocale = _patched_getlocale
+
+# Monkey-patch multiprocessing to use 'spawn' on Windows (fork is Unix-only)
+if platform.system() == "Windows":
+    _original_get_context = multiprocessing.get_context
+
+    def _patched_get_context(method=None):
+        if method == "fork":
+            method = "spawn"
+        return _original_get_context(method)
+
+    multiprocessing.get_context = _patched_get_context
 
 from ansible.cli.playbook import main
 
