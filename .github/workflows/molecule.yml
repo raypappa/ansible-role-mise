@@ -15,7 +15,7 @@ env:
   PYTHONUTF8: "1"
 
 jobs:
-  lint:
+  precommit:
     name: Lint
     runs-on: ubuntu-latest
     steps:
