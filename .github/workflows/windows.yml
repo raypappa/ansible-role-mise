@@ -68,11 +68,11 @@ jobs:
           "@ | Out-File -FilePath test_windows.yml -Encoding utf8
 
       - name: Run test playbook
-        shell: pwsh
+        shell: cmd
         run: |
-          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $env:PYTHONUTF8 = "1"
-          $env:PYTHONIOENCODING = "utf-8"
+          chcp 65001
+          set PYTHONUTF8=1
+          set PYTHONIOENCODING=utf-8
           ansible-playbook test_windows.yml -vvv
 
       - name: Clean up
