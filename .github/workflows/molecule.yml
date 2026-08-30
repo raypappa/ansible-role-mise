@@ -15,8 +15,8 @@ env:
   PYTHONUTF8: "1"
 
 jobs:
-  test:
-    name: Test
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
@@ -31,8 +31,35 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
-      - name: Install test tools
-        run: uv pip install ansible-core ansible-lint yamllint molecule molecule-plugins[docker]
+      - name: Install linting tools
+        run: uv pip install ansible-core ansible-lint yamllint
+
+      - name: Run yamllint
+        run: yamllint .
+
+      - name: Run ansible-lint
+        run: ansible-lint
+
+  molecule:
+    name: Molecule
+    needs: lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Python and uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Install molecule plugins
+        run: uv pip install molecule molecule-plugins[docker]
 
       - name: Run Molecule tests
         run: molecule test
@@ -48,13 +75,13 @@ jobs:
 
   report:
     name: Test Results
-    needs: test
+    needs: molecule
     runs-on: ubuntu-latest
     if: always()
     steps:
       - name: Check molecule results
         run: |
-          if [ "${{ needs.test.result }}" != "success" ]; then
+          if [ "${{ needs.molecule.result }}" != "success" ]; then
             echo "Molecule tests failed"
             exit 1
           fi
