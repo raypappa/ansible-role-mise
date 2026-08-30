@@ -12,48 +12,45 @@ on:
 env:
   PY_COLORS: "1"
   ANSIBLE_FORCE_COLOR: "1"
+  PYTHONUTF8: "1"
 
 jobs:
-  lint:
-    name: Lint
+  pre-commit:
+    name: Pre-commit
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-          cache: "pip"
-
-      - name: Install linting tools
-        run: pip install ansible-core ansible-lint yamllint
-
-      - name: Run yamllint
-        run: yamllint .
-
-      - name: Run ansible-lint
-        run: ansible-lint
-
-  molecule:
-    name: Molecule
-    needs: lint
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Set up Python and uv
+        uses: astral-sh/setup-uv@v5
         with:
           python-version: "3.12"
           cache: "pip"
 
       - name: Install dependencies
-        run: |
-          pip install ansible-core molecule molecule-plugins[docker]
+        run: uv sync
+
+      - name: Run pre-commit
+        uses: pre-commit/action@v4.0
+
+  molecule:
+    name: Molecule
+    needs: pre-commit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Python and uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: uv sync
 
       - name: Run Molecule tests
         run: molecule test
@@ -80,3 +77,24 @@ jobs:
             exit 1
           fi
           echo "All Molecule tests passed"
+
+  galaxy:
+    name: Publish to Galaxy
+    needs: report
+    if: github.ref == 'refs/heads/main' && needs.report.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Login to Ansible Galaxy
+        uses: Ansible.awesome-actions@v2
+        with:
+          galaxy-token: ${{ secrets.GALAXY_TOKEN }}
+
+      - name: Publish role to Galaxy
+        uses: rlease/actions-publish-ansible-role-to-galaxy@v1
+        with:
+          role_path: .
+          galaxy-username: your-galaxy-username
+          galaxy-token: ${{ secrets.GALAXY_TOKEN }}
