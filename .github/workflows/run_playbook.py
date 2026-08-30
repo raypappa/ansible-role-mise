@@ -1,5 +1,7 @@
+# mypy: disable-error-code="method-assign"
 """Wrapper to run ansible-playbook on Windows with necessary Unix stubs."""
 
+import ctypes
 import ctypes.util
 import locale
 import multiprocessing
@@ -30,17 +32,33 @@ if platform.system() == "Windows":
 
     multiprocessing.get_context = _patched_get_context
 
-# --- Patch 3: ctypes find_library for Windows ---
-_original_find_library = ctypes.util.find_library
+# --- Patch 3: ctypes libc loading for Windows ---
+if platform.system() == "Windows":
+    _original_find_library = ctypes.util.find_library
 
+    # Load msvcrt for wcwidth
+    _msvcrt = ctypes.CDLL("msvcrt")
 
-def _patched_find_library(name):
-    if name == "c":
-        return "ucrtbase"
-    return _original_find_library(name)
+    def _patched_find_library(name):
+        if name == "c":
+            return "ucrtbase"
+        return _original_find_library(name)
 
+    ctypes.util.find_library = _patched_find_library
 
-ctypes.util.find_library = _patched_find_library
+    # After Ansible loads _LIBC, we need wcwidth to come from msvcrt
+    # Hook into ctypes.CDLL attribute access to inject wcwidth
+    _orig_cdll_getattr = ctypes.CDLL.__getattr__  # type: ignore[attr-defined]
+
+    def _patched_cdll_getattr(self, name):  # type: ignore[misc]
+        if name == "wcwidth":
+            return _msvcrt.wcwidth
+        try:
+            return _orig_cdll_getattr(self, name)
+        except AttributeError:
+            raise AttributeError(f"function '{name}' not found") from None
+
+    ctypes.CDLL.__getattr__ = _patched_cdll_getattr  # type: ignore[attr-defined]
 
 # --- Patch 4: Install Unix module stubs ---
 if platform.system() == "Windows":

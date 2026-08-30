@@ -41,6 +41,7 @@ jobs:
         if: matrix.method == 'scoop'
         shell: pwsh
         run: |
+          irm get.scoop.sh | iex
           scoop install mise
 
       - name: Install mise (winget)
