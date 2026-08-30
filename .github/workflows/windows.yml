@@ -37,12 +37,10 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
-      - name: Create fcntl stub
+- name: Create fcntl stub
         shell: pwsh
         run: |
-          $fcntlDir = "${env:USERPROFILE}\AppData\Local\Programs\Python\Python312\Lib\site-packages"
-          if (-not (Test-Path $fcntlDir)) { mkdir $fcntlDir }
-          $fcntlPath = Join-Path $fcntlPath "fcntl.py"
+          $fcntlPath = "C:\hostedtoolcache\windows\Python\3.12.10\x64\Lib\site-packages\fcntl.py"
           if (-not (Test-Path $fcntlPath)) {
             "import error" | Out-File -FilePath $fcntlPath -Encoding utf8
           }
