@@ -43,8 +43,7 @@ if platform.system() == "Windows":
 
     ctypes.util.find_library = _patched_find_library
 
-    # Stub wcwidth: POSIX function not available on Windows.
-    # Return 1 for printable chars, 0 for control chars, -1 for non-printable.
+    # Stubs for POSIX width functions not available on Windows.
     def _wcwidth_stub(ch):
         cp = ord(ch)
         if cp == 0:
@@ -53,11 +52,22 @@ if platform.system() == "Windows":
             return -1
         return 1
 
+    def _wcswidth_stub(s, n):
+        total = 0
+        for ch in s[:n]:
+            w = _wcwidth_stub(ch)
+            if w < 0:
+                return -1
+            total += w
+        return total
+
     _orig_cdll_getattr = ctypes.CDLL.__getattr__  # type: ignore[attr-defined]
 
     def _patched_cdll_getattr(self, name):  # type: ignore[misc]
         if name == "wcwidth":
             return _wcwidth_stub
+        if name == "wcswidth":
+            return _wcswidth_stub
         try:
             return _orig_cdll_getattr(self, name)
         except AttributeError:

@@ -52,10 +52,9 @@ jobs:
 
       - name: Install mise (manual)
         if: matrix.method == 'manual'
-        shell: bash
+        shell: pwsh
         run: |
-          curl https://mise.run | bash
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          irm https://mise.run | pwsh
 
       - name: Create test playbook
         shell: pwsh
