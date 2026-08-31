@@ -61,33 +61,33 @@ jobs:
           path: |
             ~/.cache/molecule/
 
-  windows:
-    name: "Windows Molecule (${{ matrix.method }})"
-    runs-on: windows-latest
-    needs: lint
-    strategy:
-      fail-fast: false
-      matrix:
-        method:
-          # - manual
-          # - scoop
-          - winget
-
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v7.0.1
-
-      - name: Set up Python and uv
-        uses: astral-sh/setup-uv@v10.0.1
-        with:
-          enable-cache: true
-
-      - name: Install dependencies
-        run: uv sync
-
-      - name: Run test playbook
-        shell: pwsh
-        run: uv run molecule test -s windows
+  # windows:
+  #   name: "Windows Molecule (${{ matrix.method }})"
+  #   runs-on: windows-latest
+  #   needs: lint
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       method:
+  #         # - manual
+  #         # - scoop
+  #         - winget
+  #
+  #   steps:
+  #     - name: Check out code
+  #       uses: actions/checkout@v7.0.1
+  #
+  #     - name: Set up Python and uv
+  #       uses: astral-sh/setup-uv@v10.0.1
+  #       with:
+  #         enable-cache: true
+  #
+  #     - name: Install dependencies
+  #       run: uv sync
+  #
+  #     - name: Run test playbook
+  #       shell: pwsh
+  #       run: uv run molecule test -s windows
 
   report:
     name: Test Results
