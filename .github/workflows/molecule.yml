@@ -115,8 +115,8 @@ jobs:
       - name: Set up Python and uv
         uses: astral-sh/setup-uv@v10.0.1
 
-      - name: Install ansible-core
-        run: uv pip install ansible-core
+      - name: Install dependencies
+        run: uv sync
 
       - name: Publish role to Galaxy
         run: ansible-galaxy role publish --token=${{ secrets.GALAXY_TOKEN }} .
