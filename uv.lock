@@ -1,6 +1,11 @@
 version = 1
 revision = 3
 requires-python = "==3.13.*"
+resolution-markers = [
+    "sys_platform == 'linux2'",
+    "sys_platform == 'linux'",
+    "sys_platform != 'linux' and sys_platform != 'linux2'",
+]
 
 [[package]]
 name = "ansible-compat"
@@ -75,6 +80,13 @@ dependencies = [
     { name = "yamllint" },
 ]
 
+[package.dev-dependencies]
+dev = [
+    { name = "molecule" },
+    { name = "molecule-plugins", extra = ["docker"] },
+    { name = "winfcntl" },
+]
+
 [package.metadata]
 requires-dist = [
     { name = "ansible-core", specifier = ">=2.21.3" },
@@ -83,6 +95,13 @@ requires-dist = [
     { name = "molecule", specifier = ">=26.8.0" },
     { name = "testinfra", specifier = ">=6.0.0" },
     { name = "yamllint", specifier = ">=1.38.0" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "molecule", specifier = ">=26.8.0" },
+    { name = "molecule-plugins", extras = ["docker"], specifier = ">=26.7.15" },
+    { name = "winfcntl", specifier = ">=1.1.9" },
 ]
 
 [[package]]
@@ -438,6 +457,25 @@ wheels = [
 ]
 
 [[package]]
+name = "molecule-plugins"
+version = "26.7.15"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "molecule" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/8a/ca/2967c71978f725772b701b23bd47f9694a9428587a26aa8911ceed2d8549/molecule_plugins-26.7.15.tar.gz", hash = "sha256:df4cab8d9e13ed448fc33d72af1fbae54883e9255a42c021ae7e875dfd3374c1", size = 216679, upload-time = "2026-07-15T16:31:18.145Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b2/03/678571fb5d41e3769c578f131aff4bd5dfd8a402be2767d7374c79dc5cf6/molecule_plugins-26.7.15-py3-none-any.whl", hash = "sha256:191dfa7fd965c637e3b61d0929f2fb741f0df1181a250df62eca3657b1182794", size = 86394, upload-time = "2026-07-15T16:31:16.558Z" },
+]
+
+[package.optional-dependencies]
+docker = [
+    { name = "docker" },
+    { name = "requests" },
+    { name = "selinux", marker = "sys_platform == 'linux' or sys_platform == 'linux2'" },
+]
+
+[[package]]
 name = "mypy-extensions"
 version = "1.1.0"
 source = { registry = "https://pypi.org/simple" }
@@ -671,6 +709,18 @@ wheels = [
 ]
 
 [[package]]
+name = "selinux"
+version = "0.3.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "distro" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/25/07/51acd62e1e15e1172d46f7e32faf138725b147f8c08dbf2d512159d7a310/selinux-0.3.0.tar.gz", hash = "sha256:2a88b337ac46ad0f06f557b2806c3df62421972f766673dd8bf26732fb75a9ea", size = 13479, upload-time = "2022-12-24T16:42:13.163Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/68/a7/ef33f8e5818ed6333cf5cb6f85f4f604e13d37d1bae4671e10d6f627f6d6/selinux-0.3.0-py2.py3-none-any.whl", hash = "sha256:ecf7add45c939e9dda682c390a2cd0a845c94a4793a2cce9e8870d4ee9501f99", size = 4160, upload-time = "2022-12-24T16:42:11.745Z" },
+]
+
+[[package]]
 name = "subprocess-tee"
 version = "0.4.2"
 source = { registry = "https://pypi.org/simple" }
@@ -710,6 +760,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/57/43/30e407989e313677dbb9d5f045f966549a7254834571e342eaa4b55cc67b/wcmatch-11.0.1.tar.gz", hash = "sha256:1ea2b4fa678b8ca268253798d5963935df39132d47c3e241c0a0732224005e7d", size = 144662, upload-time = "2026-08-14T15:20:40.477Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/ce/77/7a02b0f05b3ffcdbef9719ce3ee0b508d6a29b58e95299f1580055671db3/wcmatch-11.0.1-py3-none-any.whl", hash = "sha256:fd149ecddb9f0a88ea780017d6dde17c994e494e7f7303d4e3c9d6251f978f4b", size = 43449, upload-time = "2026-08-14T15:20:39.379Z" },
+]
+
+[[package]]
+name = "winfcntl"
+version = "1.1.9"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/c7/8a/a801f742c0887bcc4ff199d769c4ca562f1f940b6b61d8084d613bef225b/winfcntl-1.1.9.tar.gz", hash = "sha256:23971ceeafee9872227cbccdeaa9d6c5836130c1c8aa8445ba54b273adee98b1", size = 3626, upload-time = "2024-08-31T03:27:12.291Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/98/cb/f79055ee11e5adf4e12164bb1c445270cfb87c188b48681b79cf20b8f662/winfcntl-1.1.9-py3-none-any.whl", hash = "sha256:efa93c1ef8d1b804be2a6ec307ed2f480d1b7fc8367771e622e1e1d3251b76ff", size = 4888, upload-time = "2024-08-31T03:27:10.563Z" },
 ]
 
 [[package]]

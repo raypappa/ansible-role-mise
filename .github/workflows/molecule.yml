@@ -56,9 +56,6 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
-      - name: Install molecule plugins
-        run: uv pip install molecule molecule-plugins[docker]
-
       - name: Run Molecule tests
         run: molecule test
 
