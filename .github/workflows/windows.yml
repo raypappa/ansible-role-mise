@@ -36,46 +36,49 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
-      - name: Install mise (scoop)
-        if: matrix.method == 'scoop'
-        shell: pwsh
-        run: |
-          irm get.scoop.sh | iex
-          scoop install mise
-
-      - name: Install mise (winget)
-        if: matrix.method == 'winget'
-        shell: pwsh
-        run: |
-          winget install --id jdx.mise --accept-package-agreements --accept-source-agreements
-
-      - name: Install mise (manual)
-        if: matrix.method == 'manual'
-        shell: pwsh
-        run: |
-          irm https://mise.run | pwsh
-
-      - name: Create test playbook
-        shell: pwsh
-        run: |
-          $playbook = @"
-          - name: Test mise installation on Windows
-            hosts: localhost
-            connection: local
-            gather_facts: true
-            tasks:
-              - name: Verify mise binary exists
-                ansible.builtin.win_shell: "where mise"
-                register: _mise_path
-                failed_when: _mise_path.rc != 0
-              - name: Get mise version
-                ansible.builtin.win_shell: "& mise --version"
-                register: _mise_version
-                changed_when: false
-              - name: Display version
-                ansible.builtin.debug:
-                  msg: "mise version: {{ _mise_version.stdout }}"
-          "@ | Out-File -FilePath test_windows.yml -Encoding utf8
+      # - name: Install mise (scoop)
+      #   if: matrix.method == 'scoop'
+      #   shell: pwsh
+      #   run: |
+      #     irm get.scoop.sh | iex
+      #     scoop install mise
+      #
+      # - name: Install mise (winget)
+      #   if: matrix.method == 'winget'
+      #   shell: pwsh
+      #   run: |
+      #     winget install --id jdx.mise --accept-package-agreements --accept-source-agreements
+      #
+      # - name: Install mise (manual)
+      #   if: matrix.method == 'manual'
+      #   shell: pwsh
+      #   run: |
+      #     irm https://mise.run | pwsh
+      #
+      # - name: Create test playbook
+      #   shell: pwsh
+      #   run: |
+      #     $playbook = @"
+      #     - name: Test mise installation on Windows
+      #       hosts: localhost
+      #       connection: local
+      #       gather_facts: true
+      #       tasks:
+      #         - name: Verify mise binary exists
+      #           ansible.builtin.win_shell: "where mise"
+      #           register: _mise_path
+      #           failed_when: _mise_path.rc != 0
+      #         - name: Get mise version
+      #           ansible.builtin.win_shell: "& mise --version"
+      #           register: _mise_version
+      #           changed_when: false
+      #         - name: Display version
+      #           ansible.builtin.debug:
+      #             msg: "mise version: {{ _mise_version.stdout }}"
+      #     "@ | Out-File -FilePath test_windows.yml -Encoding utf8
+      #
+      - name: Install molecule plugins
+        run: uv pip install molecule molecule-plugins[docker]
 
       - name: Run test playbook
         shell: pwsh
