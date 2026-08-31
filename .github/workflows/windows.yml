@@ -20,9 +20,9 @@ jobs:
       fail-fast: false
       matrix:
         method:
-          - scoop
+          # - manual
+          # - scoop
           - winget
-          - manual
 
     steps:
       - name: Check out code
@@ -31,7 +31,6 @@ jobs:
       - name: Set up Python and uv
         uses: astral-sh/setup-uv@v5
         with:
-          python-version: "3.12"
           enable-cache: true
 
       - name: Install dependencies
