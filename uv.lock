@@ -4,7 +4,8 @@ requires-python = "==3.13.*"
 resolution-markers = [
     "sys_platform == 'linux2'",
     "sys_platform == 'linux'",
-    "sys_platform != 'linux' and sys_platform != 'linux2'",
+    "sys_platform == 'win32'",
+    "sys_platform != 'linux' and sys_platform != 'linux2' and sys_platform != 'win32'",
 ]
 
 [[package]]
@@ -81,7 +82,7 @@ dev = [
     { name = "molecule-plugins", extra = ["docker"] },
     { name = "pre-commit" },
     { name = "testinfra" },
-    { name = "winfcntl" },
+    { name = "winfcntl", marker = "sys_platform == 'win32'" },
     { name = "yamllint" },
 ]
 
@@ -96,7 +97,7 @@ dev = [
     { name = "molecule-plugins", extras = ["docker"], specifier = ">=26.7.15" },
     { name = "pre-commit", specifier = ">=4.6.2" },
     { name = "testinfra", specifier = ">=6.0.0" },
-    { name = "winfcntl", specifier = ">=1.1.9" },
+    { name = "winfcntl", marker = "sys_platform == 'win32'", specifier = ">=1.1.9" },
     { name = "yamllint", specifier = ">=1.38.0" },
 ]
 
