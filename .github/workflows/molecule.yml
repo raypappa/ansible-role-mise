@@ -30,14 +30,8 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
-      - name: Install linting tools
-        run: uv pip install ansible-core ansible-lint yamllint
-
-      - name: Run yamllint
-        run: yamllint .
-
       - name: Run ansible-lint
-        run: ansible-lint
+        run: uv run pre-commit run -a
 
   molecule:
     name: Molecule
@@ -57,7 +51,7 @@ jobs:
         run: uv sync
 
       - name: Run Molecule tests
-        run: molecule test
+        run: uv run molecule test
 
       - name: Upload logs on failure
         if: failure()
@@ -66,7 +60,34 @@ jobs:
           name: molecule-logs
           path: |
             ~/.cache/molecule/
-            /tmp/molecule-*
+
+  windows:
+    name: "Windows (${{ matrix.method }})"
+    runs-on: windows-latest
+    needs: lint
+    strategy:
+      fail-fast: false
+      matrix:
+        method:
+          # - manual
+          # - scoop
+          - winget
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Python and uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Run test playbook
+        shell: pwsh
+        run: uv run molecule test -s windows
 
   report:
     name: Test Results
