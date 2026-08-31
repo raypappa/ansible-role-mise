@@ -76,9 +76,6 @@ jobs:
       #           ansible.builtin.debug:
       #             msg: "mise version: {{ _mise_version.stdout }}"
       #     "@ | Out-File -FilePath test_windows.yml -Encoding utf8
-      #
-      - name: Install molecule plugins
-        run: uv pip install molecule molecule-plugins[docker]
 
       - name: Run test playbook
         shell: pwsh

@@ -22,3 +22,10 @@ dependencies = [
 [tool.ruff.lint.per-file-ignores]
 "library/*.py" = ["E402"]
 ".github/workflows/run_playbook.py" = ["E402"]
+
+[dependency-groups]
+dev = [
+    "molecule>=26.8.0",
+    "molecule-plugins[docker]>=26.7.15",
+    "winfcntl>=1.1.9",
+]
